@@ -52,7 +52,26 @@ class FitbitAgentSystem:
     
     def _build_graph(self) -> StateGraph:
         """Build the agent workflow graph."""
-        graph = StateGraph()
+        graph = StateGraph(
+            input={
+                "start_date": str,
+                "callback": object,
+                "status": str
+            },
+            output={
+                "start_date": str,
+                "callback": object,
+                "status": str,
+                "plan": str,
+                "search_query": str,
+                "user_logged_in": bool,
+                "emails_found": bool,
+                "extracted_data": list,
+                "saved_records": list,
+                "error": str,
+                "summary": str
+            }
+        )
         
         # Add nodes for different agent functions
         graph.add_node("planner", self._planning_agent)
