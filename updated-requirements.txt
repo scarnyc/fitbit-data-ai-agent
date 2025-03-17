@@ -1,0 +1,29 @@
+# Core dependencies
+flask==2.3.3
+flask-cors==4.0.0
+gunicorn==21.2.0
+python-dotenv==1.0.0
+
+# Database
+sqlalchemy==2.0.23
+
+# Playwright for browser automation
+playwright==1.40.0
+
+# Google Gemini API for Gemma 3 27b access
+google-generativeai==0.3.2
+
+# Agent framework
+langgraph==0.1.11
+
+# Data processing
+pandas==2.1.1
+numpy==1.26.0
+
+# Charts and visualization
+matplotlib==3.8.0
+
+# Utilities
+requests==2.31.0
+python-dateutil==2.8.2
+pytz==2023.3.post1
