@@ -4,6 +4,7 @@ import logging
 from typing import Dict, Any, List, Tuple, Optional
 from dataclasses import dataclass, field
 from datetime import datetime
+import functools
 
 import google.generativeai as genai
 from langgraph.graph import StateGraph, END
@@ -18,6 +19,16 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger('agent_framework')
+
+# Helper function to add a name attribute to a function
+def named_tool(name):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+        wrapper.name = name
+        return wrapper
+    return decorator
 
 class FitbitAgentSystem:
     """LangGraph-based agent framework for Fitbit data extraction."""
@@ -40,16 +51,40 @@ class FitbitAgentSystem:
         # Initialize database
         self.db = FitbitDatabase()
         
-        # Define tools
+        # Define tools with proper interface for LangGraph
         self.tools = {
-            "browser": BrowserTool(),
-            "gmail": GmailSearchTool(),
-            "extractor": DataExtractionTool(self.gemma_model),
-            "database": DatabaseTool(self.db)
+            "browser": self._create_browser_tool(),
+            "gmail": self._create_gmail_tool(),
+            "extractor": self._create_extraction_tool(),
+            "database": self._create_database_tool()
         }
+        
+        # Add names to the planning and results functions
+        self._planning_agent = named_tool("planner")(self._planning_agent)
+        self._results_agent = named_tool("results")(self._results_agent)
         
         # Build agent graph
         self.graph = self._build_graph()
+    
+    def _create_browser_tool(self):
+        tool = BrowserTool()
+        tool.name = "browser"  # Add name attribute to the tool
+        return tool
+    
+    def _create_gmail_tool(self):
+        tool = GmailSearchTool()
+        tool.name = "gmail"  # Add name attribute to the tool
+        return tool
+    
+    def _create_extraction_tool(self):
+        tool = DataExtractionTool(self.gemma_model)
+        tool.name = "extractor"  # Add name attribute to the tool
+        return tool
+    
+    def _create_database_tool(self):
+        tool = DatabaseTool(self.db)
+        tool.name = "database"  # Add name attribute to the tool
+        return tool
     
     def _build_graph(self) -> StateGraph:
         """Build the agent workflow graph."""
@@ -84,7 +119,7 @@ class FitbitAgentSystem:
         
         graph = StateGraph(AgentState)
         
-        # Add nodes for different agent functions
+        # Add nodes for different agent functions with proper tool interfaces
         graph.add_node("planner", ToolNode(tools={"planner": self._planning_agent}))
         graph.add_node("browser_agent", ToolNode(tools={"browser": self.tools["browser"]}))
         graph.add_node("gmail_agent", ToolNode(tools={"gmail": self.tools["gmail"]}))
