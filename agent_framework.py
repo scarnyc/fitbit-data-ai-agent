@@ -60,28 +60,27 @@ class FitbitAgentSystem:
         from typing import Optional, List, Any, Dict
 
         @dataclass
-        @dataclass
-class AgentState:
-    start_date: str = ""
-    callback: Optional[Any] = None
-    status: str = ""
-    plan: str = ""
-    search_query: str = ""
-    user_logged_in: bool = False
-    emails_found: bool = False
-    extracted_data: List = field(default_factory=list)
-    saved_records: List = field(default_factory=list)
-    error: str = ""
-    summary: str = ""
+        class AgentState:
+            start_date: str = ""
+            callback: Optional[Any] = None
+            status: str = ""
+            plan: str = ""
+            search_query: str = ""
+            user_logged_in: bool = False
+            emails_found: bool = False
+            extracted_data: List = field(default_factory=list)
+            saved_records: List = field(default_factory=list)
+            error: str = ""
+            summary: str = ""
 
-    def __getitem__(self, key):
-        return getattr(self, key)
-    
-    def __setitem__(self, key, value):
-        setattr(self, key, value)
-    
-    def get(self, key, default=None):
-        return getattr(self, key, default)
+            def __getitem__(self, key):
+                return getattr(self, key)
+            
+            def __setitem__(self, key, value):
+                setattr(self, key, value)
+            
+            def get(self, key, default=None):
+                return getattr(self, key, default)
         
         graph = StateGraph(AgentState)
         
