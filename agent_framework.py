@@ -1,7 +1,8 @@
 # agent_framework.py
 import os
 import logging
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Optional
+from dataclasses import dataclass, field
 from datetime import datetime
 
 import google.generativeai as genai
@@ -59,33 +60,28 @@ class FitbitAgentSystem:
         from typing import Optional, List, Any, Dict
 
         @dataclass
-        class AgentState:
-            start_date: str = ""
-            callback: Optional[Any] = None
-            status: str = ""
-            plan: str = ""
-            search_query: str = ""
-            user_logged_in: bool = False
-            emails_found: bool = False
-            extracted_data: List = None
-            saved_records: List = None
-            error: str = ""
-            summary: str = ""
+        @dataclass
+class AgentState:
+    start_date: str = ""
+    callback: Optional[Any] = None
+    status: str = ""
+    plan: str = ""
+    search_query: str = ""
+    user_logged_in: bool = False
+    emails_found: bool = False
+    extracted_data: List = field(default_factory=list)
+    saved_records: List = field(default_factory=list)
+    error: str = ""
+    summary: str = ""
 
-            def __post_init__(self):
-                if self.extracted_data is None:
-                    self.extracted_data = []
-                if self.saved_records is None:
-                    self.saved_records = []
-            
-            def __getitem__(self, key):
-                return getattr(self, key)
-            
-            def __setitem__(self, key, value):
-                setattr(self, key, value)
-            
-            def get(self, key, default=None):
-                return getattr(self, key, default)
+    def __getitem__(self, key):
+        return getattr(self, key)
+    
+    def __setitem__(self, key, value):
+        setattr(self, key, value)
+    
+    def get(self, key, default=None):
+        return getattr(self, key, default)
         
         graph = StateGraph(AgentState)
         
