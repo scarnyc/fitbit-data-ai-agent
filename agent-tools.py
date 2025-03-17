@@ -21,22 +21,13 @@ class BrowserTool:
         """Initialize the browser tool."""
         self.browser = None
         self.page = None
-        self.name = "browser"  # Add name attribute for LangGraph compatibility
-    
-    def __call__(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        """Make the tool callable for LangGraph."""
-        action = params.get("action", "")
-        if not action:
-            return {"error": "No action specified", "success": False}
-        
-        return self.execute(action, params)
     
     def execute(self, action: str, params: Dict[str, Any]) -> Dict[str, Any]:
         """
         Execute a browser automation action.
         
         Args:
-            action: The action to perform (open, navigate, wait_for_login, close)
+            action: The action to perform (open, navigate, wait_for_login, close, auto)
             params: Parameters for the action
             
         Returns:
@@ -52,6 +43,21 @@ class BrowserTool:
             return self._wait_for_login(params)
         elif action == "close":
             return self._close_browser()
+        elif action == "auto":
+            # Automatic mode for simplified integration
+            if not self.browser:
+                # First open the browser
+                result = self._open_browser({"headless": params.get("headless", False)})
+                if not result.get("success", False):
+                    return result
+                
+            # Then navigate to Gmail
+            result = self._navigate({"url": "https://gmail.com"})
+            if not result.get("success", False):
+                return result
+                
+            # Wait for login
+            return self._wait_for_login(params)
         else:
             return {"error": f"Unknown action: {action}", "success": False}
     
@@ -148,18 +154,6 @@ class BrowserTool:
 class GmailSearchTool:
     """Tool for searching Gmail for Fitbit emails."""
     
-    def __init__(self):
-        """Initialize the Gmail search tool."""
-        self.name = "gmail"  # Add name attribute for LangGraph compatibility
-    
-    def __call__(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        """Make the tool callable for LangGraph."""
-        action = params.get("action", "")
-        if not action:
-            return {"error": "No action specified", "success": False}
-        
-        return self.execute(action, params)
-    
     def execute(self, action: str, params: Dict[str, Any]) -> Dict[str, Any]:
         """
         Execute a Gmail search action.
@@ -183,9 +177,15 @@ class GmailSearchTool:
         try:
             page = params.get("page")
             if not page:
+                # Get page from browser tool
+                browser_tool = params.get("browser_tool")
+                if browser_tool and hasattr(browser_tool, "page"):
+                    page = browser_tool.page
+                
+            if not page:
                 return {"error": "No page provided", "success": False}
             
-            search_query = params.get("query")
+            search_query = params.get("query") or params.get("search_query")
             if not search_query:
                 return {"error": "No search query provided", "success": False}
             
@@ -242,15 +242,6 @@ class DataExtractionTool:
             model: The Gemma model for data extraction
         """
         self.model = model
-        self.name = "extractor"  # Add name attribute for LangGraph compatibility
-    
-    def __call__(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        """Make the tool callable for LangGraph."""
-        action = params.get("action", "")
-        if not action:
-            return {"error": "No action specified", "success": False}
-        
-        return self.execute(action, params)
     
     def execute(self, action: str, params: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -275,7 +266,12 @@ class DataExtractionTool:
     def _extract_from_emails(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Extract data from multiple emails."""
         try:
+            # Try to get page from different sources
             page = params.get("page")
+            if not page:
+                gmail_results = params.get("gmail_results", {})
+                page = gmail_results.get("page")
+            
             if not page:
                 return {"error": "No page provided", "success": False}
             
@@ -440,15 +436,6 @@ class DatabaseTool:
             db: Database instance
         """
         self.db = db
-        self.name = "database"  # Add name attribute for LangGraph compatibility
-    
-    def __call__(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        """Make the tool callable for LangGraph."""
-        action = params.get("action", "")
-        if not action:
-            return {"error": "No action specified", "success": False}
-        
-        return self.execute(action, params)
     
     def execute(self, action: str, params: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -473,7 +460,12 @@ class DatabaseTool:
     def _save_metrics(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Save metrics to the database."""
         try:
+            # Try to get metrics from different sources
             metrics_list = params.get("metrics", [])
+            if not metrics_list:
+                extraction_results = params.get("extraction_results", {})
+                metrics_list = extraction_results.get("extracted_data", [])
+                
             if not metrics_list:
                 return {
                     "success": True,
