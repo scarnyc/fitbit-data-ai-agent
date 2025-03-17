@@ -54,18 +54,38 @@ class FitbitAgentSystem:
         """Build the agent workflow graph."""
         from typing import List, Any
         
-        class AgentState(dict):
-            start_date: str
-            callback: Any
-            status: str
-            plan: str
-            search_query: str
-            user_logged_in: bool
-            emails_found: bool
-            extracted_data: List
-            saved_records: List
-            error: str
-            summary: str
+        # Define AgentState dataclass
+        from dataclasses import dataclass
+        from typing import Optional, List, Any, Dict
+
+        @dataclass
+        class AgentState:
+            start_date: str = ""
+            callback: Optional[Any] = None
+            status: str = ""
+            plan: str = ""
+            search_query: str = ""
+            user_logged_in: bool = False
+            emails_found: bool = False
+            extracted_data: List = None
+            saved_records: List = None
+            error: str = ""
+            summary: str = ""
+
+            def __post_init__(self):
+                if self.extracted_data is None:
+                    self.extracted_data = []
+                if self.saved_records is None:
+                    self.saved_records = []
+            
+            def __getitem__(self, key):
+                return getattr(self, key)
+            
+            def __setitem__(self, key, value):
+                setattr(self, key, value)
+            
+            def get(self, key, default=None):
+                return getattr(self, key, default)
         
         graph = StateGraph(AgentState)
         
