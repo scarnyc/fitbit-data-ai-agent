@@ -85,12 +85,12 @@ class FitbitAgentSystem:
         graph = StateGraph(AgentState)
         
         # Add nodes for different agent functions
-        graph.add_node("planner", self._planning_agent)
+        graph.add_node("planner", ToolNode(tools={"planner": self._planning_agent}))
         graph.add_node("browser_agent", ToolNode(tools={"browser": self.tools["browser"]}))
         graph.add_node("gmail_agent", ToolNode(tools={"gmail": self.tools["gmail"]}))
         graph.add_node("extraction_agent", ToolNode(tools={"extractor": self.tools["extractor"]}))
         graph.add_node("database_agent", ToolNode(tools={"database": self.tools["database"]}))
-        graph.add_node("results_agent", self._results_agent)
+        graph.add_node("results_agent", ToolNode(tools={"results": self._results_agent}))
         
         # Define conditional routing
         def route_from_browser(state):
