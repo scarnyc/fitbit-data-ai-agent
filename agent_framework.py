@@ -52,22 +52,22 @@ class FitbitAgentSystem:
     
     def _build_graph(self) -> StateGraph:
         """Build the agent workflow graph."""
-        # Define state schema
-        state_schema = {
-            "start_date": str,
-            "callback": object,
-            "status": str,
-            "plan": str,
-            "search_query": str,
-            "user_logged_in": bool,
-            "emails_found": bool,
-            "extracted_data": list,
-            "saved_records": list,
-            "error": str,
-            "summary": str
-        }
+        from typing import List, Any
         
-        graph = StateGraph(state_schema=state_schema)
+        class AgentState(dict):
+            start_date: str
+            callback: Any
+            status: str
+            plan: str
+            search_query: str
+            user_logged_in: bool
+            emails_found: bool
+            extracted_data: List
+            saved_records: List
+            error: str
+            summary: str
+        
+        graph = StateGraph(AgentState)
         
         # Add nodes for different agent functions
         graph.add_node("planner", self._planning_agent)
