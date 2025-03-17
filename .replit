@@ -6,3 +6,15 @@ channel = "stable-24_05"
 
 [deployment]
 run = ["sh", "-c", "python main.py"]
+
+[workflows]
+runButton = "Fitbit Agent"
+
+[[workflows.workflow]]
+name = "Fitbit Agent"
+author = 38984291
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python main.py"
