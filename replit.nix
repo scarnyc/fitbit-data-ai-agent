@@ -1,17 +1,30 @@
-{pkgs}: {
+
+{ pkgs }: {
   deps = [
-    pkgs.glibcLocales
+    pkgs.python39
     pkgs.playwright-driver
-    pkgs.gitFull
-    pkgs.tk
-    pkgs.tcl
-    pkgs.qhull
-    pkgs.pkg-config
-    pkgs.gtk3
-    pkgs.gobject-introspection
-    pkgs.ghostscript
-    pkgs.freetype
-    pkgs.ffmpeg-full
+    pkgs.chromium
+    pkgs.firefox
+    pkgs.xorg.libX11
+    pkgs.xorg.libXcomposite
+    pkgs.xorg.libXdamage
+    pkgs.xorg.libXext
+    pkgs.xorg.libXfixes
+    pkgs.xorg.libXrandr
+    pkgs.at-spi2-core
+    pkgs.at-spi2-atk
+    pkgs.dbus
+    pkgs.expat
+    pkgs.nspr
+    pkgs.nss
+    pkgs.cups
+    pkgs.libdrm
+    pkgs.mesa
+    pkgs.pango
     pkgs.cairo
+    pkgs.alsa-lib
+    pkgs.atk
+    pkgs.gtk3
+    pkgs.libuuid
   ];
 }
