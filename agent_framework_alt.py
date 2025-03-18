@@ -336,15 +336,15 @@ class FitbitAgentSystem:
         try:
             logger.info(f"Starting Fitbit agent system with start date {start_date}")
             final_state = self.graph.invoke(initial_state)
-            logger.info(f"Agent system completed with status: {final_state.get('status')}")
+            logger.info(f"Agent system completed with status: {getattr(final_state, 'status', 'unknown')}")
 
             # Convert dataclass to dict for return
             result = {
-                "status": final_state.status,
-                "summary": final_state.summary,
-                "error": final_state.error,
-                "extracted_data": final_state.extracted_data,
-                "saved_records": final_state.saved_records
+                "status": getattr(final_state, "status", "unknown"),
+                "summary": getattr(final_state, "summary", ""),
+                "error": getattr(final_state, "error", ""),
+                "extracted_data": getattr(final_state, "extracted_data", []),
+                "saved_records": getattr(final_state, "saved_records", [])
             }
 
             return result
