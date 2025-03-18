@@ -1,4 +1,4 @@
-modules = ["python-3.10:v18-20230807-322e88b"]
+modules = ["python-3.12:v3-20240116-aaa41741"]
 run = "python main.py"
 
 [nix]

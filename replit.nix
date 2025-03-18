@@ -1,7 +1,8 @@
 
 { pkgs }: {
   deps = [
-    pkgs.python310
+    pkgs.python312
+    pkgs.nodejs
     pkgs.playwright-driver
     pkgs.chromium
     pkgs.firefox
@@ -30,4 +31,8 @@
     pkgs.libxcb
     pkgs.xorg.xauth
   ];
+  env = {
+    PYTHONBIN = "${pkgs.python312}/bin/python3";
+    LANG = "en_US.UTF-8";
+  };
 }
