@@ -336,15 +336,23 @@ class FitbitAgentSystem:
         try:
             logger.info(f"Starting Fitbit agent system with start date {start_date}")
             final_state = self.graph.invoke(initial_state)
-            logger.info(f"Agent system completed with status: {getattr(final_state, 'status', 'unknown')}")
+            
+            # Handle different types of state objects safely
+            status = (
+                final_state.get("status", "unknown") 
+                if hasattr(final_state, "get") 
+                else getattr(final_state, "status", "unknown")
+            )
+            
+            logger.info(f"Agent system completed with status: {status}")
 
-            # Convert dataclass to dict for return
+            # Convert state to dict safely
             result = {
-                "status": getattr(final_state, "status", "unknown"),
-                "summary": getattr(final_state, "summary", ""),
-                "error": getattr(final_state, "error", ""),
-                "extracted_data": getattr(final_state, "extracted_data", []),
-                "saved_records": getattr(final_state, "saved_records", [])
+                "status": status,
+                "summary": final_state.get("summary", "") if hasattr(final_state, "get") else getattr(final_state, "summary", ""),
+                "error": final_state.get("error", "") if hasattr(final_state, "get") else getattr(final_state, "error", ""),
+                "extracted_data": final_state.get("extracted_data", []) if hasattr(final_state, "get") else getattr(final_state, "extracted_data", []),
+                "saved_records": final_state.get("saved_records", []) if hasattr(final_state, "get") else getattr(final_state, "saved_records", [])
             }
 
             return result
