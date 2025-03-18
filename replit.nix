@@ -26,5 +26,8 @@
     pkgs.atk
     pkgs.gtk3
     pkgs.libuuid
+    pkgs.libxkbcommon
+    pkgs.libxcb
+    pkgs.xorg.xauth
   ];
 }
