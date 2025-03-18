@@ -5,8 +5,7 @@ import os
 from datetime import datetime
 import threading
 
-# Import our simple agent implementation
-from simple_agent import FitbitAgentSystem
+from agent_framework import FitbitAgentSystem
 from database import FitbitDatabase
 
 app = Flask(__name__)
@@ -79,7 +78,7 @@ def start_extraction():
                 agent_results = {
                     "status": result.get("status", "complete"),
                     "message": result.get("summary", "Extraction complete"),
-                    "progress": 100 if result.get("status") == "complete" else 0,
+                    "progress": 100,
                     "last_run": agent_results["last_run"],
                     "data_count": len(result.get("saved_records", []))
                 }
@@ -197,6 +196,51 @@ def api_metrics():
     """
     metrics = db.get_all_metrics()
     return jsonify(metrics)
+
+@app.route('/api/add-agent', methods=['POST'])
+def add_agent():
+    """
+    Add a new agent to the system.
+    
+    This demonstrates how the system can be extended with new agents.
+    """
+    agent_type = request.form.get('agent_type')
+    agent_config = request.json or {}
+    
+    # In a real implementation, this would dynamically add a new agent to the framework
+    
+    return jsonify({
+        "status": "success", 
+        "message": f"Agent of type {agent_type} added (demonstration only)",
+        "note": "This is a demonstration endpoint showing how new agents could be added dynamically"
+    })
+
+@app.route('/settings')
+def settings():
+    """Render the settings page for agent configuration."""
+    # Here you could load agent configurations from a database or config file
+    agent_config = {
+        "browser_agent": {"enabled": True},
+        "gmail_agent": {"enabled": True},
+        "extraction_agent": {"enabled": True},
+        "database_agent": {"enabled": True}
+    }
+    
+    return render_template('settings.html', agent_config=agent_config)
+
+@app.route('/update-settings', methods=['POST'])
+def update_settings():
+    """
+    Update agent system settings.
+    
+    This endpoint handles form submissions from the settings page.
+    """
+    # Example: update agent configurations
+    agent_config = request.form.to_dict()
+    
+    # Here you could save agent configurations to a database or config file
+    
+    return redirect(url_for('settings', updated=True))
 
 # Run the application
 if __name__ == '__main__':
