@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitbit Data Extraction</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00B0B9;
+            --secondary: #FF4081;
+            --text: #2C3E50;
+            --success: #4CAF50;
+            --warning: #FFC107;
+            --background: #FFFFFF;
+        }
+        body {
+            font-family: 'Inter', 'Roboto', sans-serif;
+            color: var(--text);
+            background-color: var(--background);
+        }
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+        .status-indicator {
+            border-radius: 50%;
+            width: 10px;
+            height: 10px;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .status-waiting {
+            background-color: var(--warning);
+        }
+        .status-success {
+            background-color: var(--success);
+        }
+        .status-error {
+            background-color: #F44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-12 text-center">
+            <h1 class="text-3xl font-bold" style="color: var(--primary);">Fitbit Data Extraction Agent</h1>
+            <p class="text-gray-600 mt-2">Automatically extract Fitbit data from your Gmail account</p>
+        </header>
+
+        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">How it works</h2>
+            <ol class="list-decimal list-inside space-y-2 text-gray-700">
+                <li>Click the "Start Extraction" button below</li>
+                <li>A browser window will open navigating to Gmail</li>
+                <li>Log in to your Gmail account when prompted</li>
+                <li>The agent will automatically search for Fitbit weekly reports</li>
+                <li>Data will be extracted and stored in the database</li>
+                <li>View your organized Fitbit data on the data page</li>
+            </ol>
+        </div>
+
+        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Start Extraction Process</h2>
+            <p class="mb-4">This process will open a browser window to extract your Fitbit data from Gmail.</p>
+            <button id="extractButton" class="btn-primary px-4 py-2 rounded-md hover:opacity-90 transition-opacity">
+                Start Extraction
+            </button>
+            <div id="statusContainer" class="mt-4">
+                <div class="flex items-center">
+                    <span class="status-indicator {% if status.status == 'idle' %}status-waiting{% elif status.status == 'error' %}status-error{% else %}status-success{% endif %}" id="statusIndicator"></span>
+                    <span id="statusMessage">{{ status.message }}</span>
+                </div>
+                <div class="mt-2" id="progressContainer">
+                    <div class="h-2 bg-gray-200 rounded-full">
+                        <div id="progressBar" class="h-2 rounded-full bg-green-500" style="width: {{ status.progress|default(0) }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-center mt-8">
+            <a href="/view-data" class="btn-secondary px-4 py-2 rounded-md hover:opacity-90 transition-opacity">
+                View Extracted Data
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('extractButton').addEventListener('click', function() {
+            // Update status
+            document.getElementById('statusMessage').textContent = 'Starting extraction process...';
+            
+            // Disable button
+            this.disabled = true;
+            this.classList.add('opacity-50');
+            
+            // Make API call to start extraction
+            fetch('/start-extraction', {
+                method: 'POST',
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success' || data.status === 'started') {
+                    document.getElementById('statusIndicator').classList.remove('status-waiting');
+                    document.getElementById('statusIndicator').classList.add('status-success');
+                    document.getElementById('statusMessage').textContent = data.message;
+                    
+                    // Poll for status updates
+                    pollStatus();
+                } else {
+                    document.getElementById('statusIndicator').classList.remove('status-waiting');
+                    document.getElementById('statusIndicator').classList.add('status-error');
+                    document.getElementById('statusMessage').textContent = 'Error: ' + data.message;
+                    
+                    // Re-enable button
+                    document.getElementById('extractButton').disabled = false;
+                    document.getElementById('extractButton').classList.remove('opacity-50');
+                }
+            })
+            .catch(error => {
+                document.getElementById('statusIndicator').classList.remove('status-waiting');
+                document.getElementById('statusIndicator').classList.add('status-error');
+                document.getElementById('statusMessage').textContent = 'Error: ' + error.message;
+                
+                // Re-enable button
+                document.getElementById('extractButton').disabled = false;
+                document.getElementById('extractButton').classList.remove('opacity-50');
+            });
+        });
+
+        function pollStatus() {
+            // Poll the status endpoint every 2 seconds
+            const statusInterval = setInterval(function() {
+                fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('statusMessage').textContent = data.message;
+                    document.getElementById('progressBar').style.width = data.progress + '%';
+                    
+                    // If process is complete or has error, stop polling
+                    if (data.status === 'complete' || data.status === 'error') {
+                        clearInterval(statusInterval);
+                        
+                        // Re-enable button
+                        document.getElementById('extractButton').disabled = false;
+                        document.getElementById('extractButton').classList.remove('opacity-50');
+                        
+                        // Update status indicator
+                        if (data.status === 'error') {
+                            document.getElementById('statusIndicator').classList.remove('status-success');
+                            document.getElementById('statusIndicator').classList.add('status-error');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error polling status:', error);
+                });
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
