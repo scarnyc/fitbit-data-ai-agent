@@ -1,7 +1,7 @@
 
 { pkgs }: {
   deps = [
-    pkgs.python39
+    pkgs.python310
     pkgs.playwright-driver
     pkgs.chromium
     pkgs.firefox
