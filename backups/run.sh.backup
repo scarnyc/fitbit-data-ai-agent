@@ -1,0 +1,39 @@
+#!/bin/bash
+# save this as run.sh and make it executable with: chmod +x run.sh
+
+# Check which Python commands are available
+echo "Checking available Python commands..."
+which python || echo "python command not found"
+which python3 || echo "python3 command not found"
+which $PYTHONBIN || echo "PYTHONBIN environment variable not found or not pointing to a valid Python executable"
+
+# Try to find any Python executable
+PYTHON_CMD=""
+if command -v python &> /dev/null; then
+    PYTHON_CMD="python"
+elif command -v python3 &> /dev/null; then
+    PYTHON_CMD="python3"
+elif [ ! -z "$PYTHONBIN" ] && [ -x "$PYTHONBIN" ]; then
+    PYTHON_CMD="$PYTHONBIN"
+elif [ -x "/opt/python/3.12/bin/python" ]; then
+    # Common Replit Python path
+    PYTHON_CMD="/opt/python/3.12/bin/python"
+else
+    echo "No Python executable found. Attempting to install Python..."
+    # Try to install Python (this depends on your system)
+    apt-get update && apt-get install -y python3 || echo "Failed to install Python"
+    if command -v python3 &> /dev/null; then
+        PYTHON_CMD="python3"
+    else
+        echo "ERROR: Could not find or install Python."
+        exit 1
+    fi
+fi
+
+# Print Python version for debugging
+echo "Using Python command: $PYTHON_CMD"
+$PYTHON_CMD --version
+
+# Run the main script
+echo "Running main.py..."
+$PYTHON_CMD main.py
