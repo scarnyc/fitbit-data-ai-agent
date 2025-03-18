@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitbit Data Extraction</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00B0B9;
+            --secondary: #FF4081;
+            --text: #2C3E50;
+            --success: #4CAF50;
+            --warning: #FFC107;
+            --background: #FFFFFF;
+        }
+        body {
+            font-family: 'Inter', 'Roboto', sans-serif;
+            color: var(--text);
+            background-color: var(--background);
+        }
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-12 text-center">
+            <h1 class="text-3xl font-bold" style="color: var(--primary);">Fitbit Data Extraction Agent</h1>
+            <p class="text-gray-600 mt-2">Automatically extract Fitbit data from your Gmail account</p>
+        </header>
+        <div id="statusContainer" class="bg-white shadow-md rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Status: {{ status.status }}</h2>
+            <p class="mb-4">{{ status.message }}</p>
+            {% if status.progress %}
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ status.progress }}%"></div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
